@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patalgaon Cricket Club </title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #e0f7fa;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      margin-bottom: 5px;
+    }
+    .dropdown {
+      margin-bottom: 15px;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .controls, .batting-controls, .scoreboard, .log {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      width: 320px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .section-title {
+      font-weight: bold;
+      margin-bottom: 15px;
+      font-size: 1.1em;
+    }
+    button {
+      padding: 10px;
+      margin: 5px;
+      width: 70px;
+      border: none;
+      background-color: #0288d1;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #01579b;
+    }
+    input, select {
+      padding: 10px;
+      width: calc(100% - 24px);
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+    }
+    .top-controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+    }
+    .log {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 20px;
+    }
+    .log-entry {
+      border-bottom: 1px solid #ccc;
+      padding: 5px 0;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Patalgaon Cricket Club</h1>
+
+  <div class="dropdown">
+    <label for="battingTeam">Select Batting Team: </label>
+    <select id="battingTeam" onchange="updateBattingTeam()">
+      <option value="Team Dheeru">Team Dheeru</option>
+      <option value="Team Kannu">Team Kannu</option>
+    </select>
+    <br><br>
+    <label for="maxOvers">Select Overs: </label>
+    <select id="maxOvers" onchange="updateMaxOvers()">
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+      <option value="6">6</option>
+      <option value="7">7</option>
+      <option value="8">8</option>
+    </select>
+  </div>
+
+  <div class="top-controls">
+    <div class="controls">
+      <div class="section-title">Bowling Controls</div>
+      <button onclick="bowl('fair')">Fair Ball</button>
+      <button onclick="bowl('no')">No Ball</button>
+      <button onclick="bowl('wide')">Wide</button>
+    </div>
+
+    <div class="batting-controls">
+      <div class="section-title">Batting Controls</div>
+      <button onclick="addRuns(1)">1</button>
+      <button onclick="addRuns(2)">2</button>
+      <button onclick="addRuns(3)">3</button>
+      <button onclick="addRuns(4)">4</button>
+      <button onclick="addRuns(5)">5</button>
+      <button onclick="addRuns(6)">6</button>
+      <input type="number" id="manualRun" placeholder="Enter runs" onkeyup="manualEntry(event)" />
+    </div>
+  </div>
+
+  <div class="scoreboard">
+    <div class="section-title">Scoreboard</div>
+    <p>Batting: <span id="battingDisplay">Team Dheeru</span></p>
+    <p>Current Over: <span id="currentBalls">0</span>/6</p>
+    <p>Total Overs: <span id="totalOvers">0</span></p>
+    <p>Runs: <span id="runs">0</span></p>
+    <p>Free Hit: <span id="freeHit">No</span></p>
+  </div>
+
+  <div class="log">
+    <div class="section-title">Ball-by-Ball Log</div>
+    <div id="logEntries"></div>
+  </div>
+
+  <script>
+    let currentBalls = 0;
+    let totalOvers = 0;
+    let runs = 0;
+    let freeHit = false;
+    let battingTeam = "Team Dheeru";
+    let maxOvers = 3;
+
+    function updateUI() {
+      document.getElementById('currentBalls').innerText = currentBalls;
+      document.getElementById('totalOvers').innerText = totalOvers;
+      document.getElementById('runs').innerText = runs;
+      document.getElementById('freeHit').innerText = freeHit ? 'Yes' : 'No';
+      document.getElementById('battingDisplay').innerText = battingTeam;
+    }
+
+    function logEvent(text) {
+      const log = document.getElementById('logEntries');
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.innerText = text;
+      log.prepend(entry);
+    }
+
+    function bowl(type) {
+      if (type === 'fair') {
+        currentBalls++;
+        freeHit = false;
+        logEvent(`Ball: Fair Delivery`);
+        if (currentBalls === 6) {
+          totalOvers++;
+          currentBalls = 0;
+          alert("Over Complete");
+          if (totalOvers === maxOvers) {
+            alert("Innings Over");
+          }
+        }
+      } else if (type === 'no') {
+        runs++;
+        freeHit = true;
+        logEvent(`Ball: No Ball (+1 Run)`);
+      } else if (type === 'wide') {
+        runs++;
+        logEvent(`Ball: Wide (+1 Run)`);
+      }
+      updateUI();
+    }
+
+    function addRuns(run) {
+      runs += run;
+      logEvent(`Runs Scored: ${run}` + (freeHit ? " (Free Hit)" : ""));
+      if (freeHit) freeHit = false;
+      updateUI();
+    }
+
+    function manualEntry(e) {
+      if (e.key === 'Enter') {
+        const val = parseInt(e.target.value);
+        if (!isNaN(val)) {
+          addRuns(val);
+          e.target.value = '';
+        }
+      }
+    }
+
+    function updateBattingTeam() {
+      battingTeam = document.getElementById('battingTeam').value;
+      updateUI();
+    }
+
+    function updateMaxOvers() {
+      maxOvers = parseInt(document.getElementById('maxOvers').value);
+    }
+
+    updateUI();
+  </script>
+</body>
+</html>
